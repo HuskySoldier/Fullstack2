@@ -62,6 +62,29 @@ small.error{color:var(--danger);height:14px}
   gap: 10px;
 }
 
+/* Visual de error en inputs */
+input[aria-invalid="true"], textarea[aria-invalid="true"], select[aria-invalid="true"]{
+  border-color: #ff6b6b !important;
+  box-shadow: 0 0 0 3px rgba(255,107,107,.15);
+}
+small.error{ color:#ff6b6b; min-height:14px; }
+
+/* Botón peligro */
+.btn.danger{ background:#ff6b6b; border-color:transparent; color:#fff; font-weight:700 }
+
+/* Nav responsivo simple */
+@media (max-width: 700px){
+  .nav{ gap:8px }
+  .nav a{ padding:8px }
+  .header{ padding:12px 0 }
+}
+
+/* Tablas admin en móvil */
+@media (max-width: 900px){
+  .table th, .table td{ font-size:.9rem; padding:8px }
+}
+
+
 
 @media (max-width: 920px){.grid{grid-template-columns:1fr 1fr}.forms-grid{grid-template-columns:1fr}}
 @media (max-width: 600px){.grid{grid-template-columns:1fr}.benefits{grid-template-columns:1fr}}

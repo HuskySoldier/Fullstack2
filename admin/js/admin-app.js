@@ -3,7 +3,8 @@ const STORE = {
   get(k){ return JSON.parse(localStorage.getItem(k)||'[]'); },
   set(k,v){ localStorage.setItem(k, JSON.stringify(v)); },
 };
-const K = { PRODS:'admin_products', USERS:'admin_users' };
+const K = { PRODS:'admin_products', USERS:'users' }; // 👈 misma key que en tienda
+
 
 function initDashboard(){
   const kpip = document.getElementById('kpi-prod');

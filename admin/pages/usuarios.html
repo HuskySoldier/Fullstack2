@@ -103,23 +103,113 @@
   <!-- Scripts -->
   <script src="../js/data/regions.js"></script>
   <script src="../js/validators.js"></script>
-  <script src="../js/admin-users.js"></script>
   <script>
-    // Inicializar tabla al cargar
-    renderUsers();
+    // ---------------- Admin Users ----------------
+    const USERS_KEY = "users";
 
-    // Guardar usuario
-    document.getElementById("frm-usuario").addEventListener("submit", e=>{
-      e.preventDefault();
-      saveUserForm();
-    });
+    function getUsers(){ return JSON.parse(localStorage.getItem(USERS_KEY) || "[]"); }
+    function setUsers(arr){ localStorage.setItem(USERS_KEY, JSON.stringify(arr)); }
 
-    // Limpiar formulario
-    document.getElementById("btn-limpiar-u").addEventListener("click", ()=>{
+    function renderUsers(){
+      const tb = document.querySelector("#tbl-usuarios tbody");
+      if(!tb) return;
+
+      const users = getUsers();
+
+      if(users.length === 0){
+        tb.innerHTML = "<tr><td colspan='7'>No hay usuarios registrados</td></tr>";
+        return;
+      }
+
+      tb.innerHTML = users.map((u, idx) => `
+        <tr>
+          <td>${u.run || "-"}</td>
+          <td>${u.nombre || "-"}</td>
+          <td>${u.apellidos || "-"}</td>
+          <td>${u.email}</td>
+          <td>${u.rol}</td>
+          <td>${u.region || ""}/${u.comuna || ""}</td>
+          <td>
+            <button class="btn" onclick="editUser(${idx})">Editar</button>
+            <button class="btn danger" onclick="deleteUser(${idx})">Eliminar</button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function saveUserForm(){
+      const idx = document.getElementById("u-index").value;
+      const run = document.getElementById("u-run").value.trim().toUpperCase();
+      const nombre = document.getElementById("u-nombre").value.trim();
+      const apellidos = document.getElementById("u-apellidos").value.trim();
+      const email = document.getElementById("u-email").value.trim();
+      const fnac = document.getElementById("u-fnac").value;
+      const rol = document.getElementById("u-rol").value;
+      const region = document.getElementById("u-region").value;
+      const comuna = document.getElementById("u-comuna").value;
+      const dir = document.getElementById("u-dir").value.trim();
+
+      if(!nombre || !email || !rol){
+        alert("Faltan campos obligatorios");
+        return;
+      }
+
+      let users = getUsers();
+      const obj = { run, nombre, apellidos, email, fnac, rol, region, comuna, dir, pass: "" };
+
+      if(idx){ // editar
+        users[idx] = {...users[idx], ...obj};
+      } else { // nuevo
+        if(users.find(u => u.email === email)){
+          alert("Ya existe un usuario con ese correo");
+          return;
+        }
+        users.push(obj);
+      }
+
+      setUsers(users);
+      renderUsers();
       document.getElementById("frm-usuario").reset();
       document.getElementById("u-index").value = "";
+    }
+
+    function editUser(idx){
+      const u = getUsers()[idx];
+      if(!u) return;
+      document.getElementById("u-index").value = idx;
+      document.getElementById("u-run").value = u.run || "";
+      document.getElementById("u-nombre").value = u.nombre || "";
+      document.getElementById("u-apellidos").value = u.apellidos || "";
+      document.getElementById("u-email").value = u.email || "";
+      document.getElementById("u-fnac").value = u.fnac || "";
+      document.getElementById("u-rol").value = u.rol || "";
+      document.getElementById("u-region").value = u.region || "";
+      document.getElementById("u-comuna").value = u.comuna || "";
+      document.getElementById("u-dir").value = u.dir || "";
+    }
+
+    function deleteUser(idx){
+      if(!confirm("¿Eliminar este usuario?")) return;
+      let users = getUsers();
+      users.splice(idx, 1);
+      setUsers(users);
+      renderUsers();
+    }
+
+    // ---------------- Init ----------------
+    document.addEventListener("DOMContentLoaded", ()=>{
+      renderUsers();
+
+      document.getElementById("frm-usuario").addEventListener("submit", e=>{
+        e.preventDefault();
+        saveUserForm();
+      });
+
+      document.getElementById("btn-limpiar-u").addEventListener("click", ()=>{
+        document.getElementById("frm-usuario").reset();
+        document.getElementById("u-index").value = "";
+      });
     });
   </script>
 </body>
 </html>
-

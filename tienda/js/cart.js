@@ -1,10 +1,15 @@
 // ----------------- Carrito -----------------
+const CART_KEY = "cart";
+const ORDER_KEY = "orders";
 
 // Añadir producto al carrito
 function addToCart(id){
-  let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+  let cart = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
   const prod = PRODUCTS.find(p => p.id === id);
-  if(!prod) return alert("Producto no encontrado");
+  if(!prod) {
+    showModal({ title: "Error", body: "Producto no encontrado" });
+    return;
+  }
 
   let item = cart.find(x => x.id === id);
   if(item){
@@ -13,18 +18,25 @@ function addToCart(id){
     cart.push({id: prod.id, nombre: prod.nombre, precio: prod.precio, qty: 1});
   }
 
-  localStorage.setItem("cart", JSON.stringify(cart));
-  alert(`Se agregó "${prod.nombre}" al carrito`);
+  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+
+  showModal({
+    title: "Producto agregado",
+    body: `<p>Se agregó <strong>${prod.nombre}</strong> al carrito.</p>`,
+    actions: [
+      { label: "Seguir comprando" },
+      { label: "Ver carrito", primary: true, handler: ()=>{ location.href="carrito.html"; } }
+    ]
+  });
 }
 
 // Mostrar carrito en la página carrito.html
 function renderCart(){
   const cont = document.getElementById("cart-list");
   const totalEl = document.getElementById("cart-total");
-
   if(!cont || !totalEl) return;
 
-  let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+  let cart = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
   if(cart.length === 0){
     cont.innerHTML = "<p>Carrito vacío</p>";
     totalEl.textContent = "Total: $0";
@@ -50,37 +62,58 @@ function renderCart(){
 
 // Eliminar producto del carrito
 function removeFromCart(id){
-  let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+  let cart = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
   cart = cart.filter(item => item.id !== id);
-  localStorage.setItem("cart", JSON.stringify(cart));
+  localStorage.setItem(CART_KEY, JSON.stringify(cart));
   renderCart();
 }
 
 // Vaciar carrito
 function clearCart(){
-  localStorage.removeItem("cart");
+  localStorage.removeItem(CART_KEY);
   renderCart();
 }
 
-// Confirmar compra (checkout simulado)
+// Confirmar compra (checkout simulado con orden)
 function checkout(){
-  let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+  let cart = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
   if(cart.length === 0){
-    alert("Tu carrito está vacío");
+    showModal({ title: "Carrito vacío", body: "<p>No tienes productos en el carrito.</p>" });
     return;
   }
 
   // Calcular total
   let total = cart.reduce((acc, item) => acc + (item.precio * item.qty), 0);
 
-  // Simulación de pago
-  alert(`Compra realizada con éxito.\nTotal pagado: ${CLP(total)}\n¡Gracias por preferir GymTastic!`);
+  // Crear orden
+  const orderId = "ORD-" + new Date().toISOString().replace(/[-:.TZ]/g,"").slice(0,14);
+  const session = JSON.parse(localStorage.getItem("session_user") || "null");
+  const orders = JSON.parse(localStorage.getItem(ORDER_KEY) || "[]");
+
+  orders.push({
+    id: orderId,
+    date: new Date().toISOString(),
+    items: cart,
+    total,
+    user: session ? session.email : null
+  });
+
+  localStorage.setItem(ORDER_KEY, JSON.stringify(orders));
 
   // Vaciar carrito
-  localStorage.removeItem("cart");
-
-  // Refrescar vista
+  localStorage.removeItem(CART_KEY);
   renderCart();
+
+  // Mostrar comprobante
+  showModal({
+    title: "✅ Compra realizada",
+    body: `
+      <p>Número de orden: <strong>${orderId}</strong></p>
+      <p>Total pagado: <strong>${CLP(total)}</strong></p>
+      <p>${session ? `Se enviará comprobante a <strong>${session.email}</strong>` : "Puedes registrarte para guardar tus compras."}</p>
+    `,
+    actions: [{ label: "Aceptar", primary: true }]
+  });
 }
 
 

@@ -19,13 +19,24 @@
     <main class="main">
       <h1>Dashboard</h1>
       <div class="grid">
-        <article class="card"><h3>Resumen</h3><p class="badge" id="kpi-prod">0 productos</p><p class="badge" id="kpi-users">0 usuarios</p></article>
-        <article class="card"><h3>Acciones rápidas</h3><a class="btn primary" href="pages/productos.html">Nuevo producto</a> <a class="btn" href="pages/usuarios.html">Nuevo usuario</a></article>
+        <article class="card"><h3>Usuarios</h3><p class="badge" id="kpi-users">0</p></article>
+        <article class="card"><h3>Productos</h3><p class="badge" id="kpi-prod">0</p></article>
+        <article class="card"><h3>Órdenes</h3><p class="badge" id="kpi-orders">0</p></article>
+        <article class="card"><h3>Total Vendido</h3><p class="badge" id="kpi-rev">$0</p></article>
       </div>
+      <article class="card" style="margin-top:16px">
+        <h3>Ventas por día</h3>
+        <canvas id="chart-sales" height="120"></canvas>
+      </article>
+
     </main>
   </div>
   <script src="js/data/regions.js"></script>
   <script src="js/validators.js"></script>
   <script src="js/admin-app.js"></script>
+  <script src="js/guard.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="js/dashboard.js"></script>
+
 </body>
 </html>
