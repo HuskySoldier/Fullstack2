@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Usuarios | Admin</title>
+  <link rel="stylesheet" href="../css/admin.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="aside">
+      <a class="brand" href="../index.html">
+        <img src="../assets/logo.svg" alt="Logo" width="28" height="28"/>
+        <span>GymTastic Admin</span>
+      </a>
+      <nav>
+        <a href="../index.html">Dashboard</a>
+        <a href="productos.html">Productos</a>
+        <a class="active" href="usuarios.html">Usuarios</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <h1>Usuarios</h1>
+      <div class="grid">
+        <!-- Listado -->
+        <article class="card">
+          <h3>Listado</h3>
+          <table class="table" id="tbl-usuarios">
+            <thead>
+              <tr>
+                <th>RUN</th>
+                <th>Nombre</th>
+                <th>Apellidos</th>
+                <th>Correo</th>
+                <th>Rol</th>
+                <th>Región/Comuna</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </article>
+
+        <!-- Formulario -->
+        <article class="card">
+          <h3>Nuevo / Editar</h3>
+          <form id="frm-usuario" class="form">
+            <!-- index oculto -->
+            <input type="hidden" id="u-index" />
+            
+            <div class="field">
+              <label>RUN (sin puntos ni guion)</label>
+              <input id="u-run" minlength="7" maxlength="9" placeholder="19011022K">
+            </div>
+            <div class="field">
+              <label>Nombre</label>
+              <input id="u-nombre" required maxlength="50">
+            </div>
+            <div class="field">
+              <label>Apellidos</label>
+              <input id="u-apellidos" maxlength="100">
+            </div>
+            <div class="field">
+              <label>Correo</label>
+              <input id="u-email" required maxlength="100" placeholder="usuario@duoc.cl">
+            </div>
+            <div class="field">
+              <label>Fecha Nacimiento (opcional)</label>
+              <input id="u-fnac" type="date">
+            </div>
+            <div class="field">
+              <label>Rol</label>
+              <select id="u-rol" required>
+                <option value="">Seleccionar</option>
+                <option>Administrador</option>
+                <option>Vendedor</option>
+                <option>Cliente</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Región</label>
+              <select id="u-region"></select>
+            </div>
+            <div class="field">
+              <label>Comuna</label>
+              <select id="u-comuna"></select>
+            </div>
+            <div class="field">
+              <label>Dirección</label>
+              <input id="u-dir" maxlength="300">
+            </div>
+            <div class="actions">
+              <button class="btn primary" type="submit">Guardar</button>
+              <button class="btn" type="button" id="btn-limpiar-u">Limpiar</button>
+            </div>
+          </form>
+        </article>
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../js/data/regions.js"></script>
+  <script src="../js/validators.js"></script>
+  <script src="../js/admin-users.js"></script>
+  <script>
+    // Inicializar tabla al cargar
+    renderUsers();
+
+    // Guardar usuario
+    document.getElementById("frm-usuario").addEventListener("submit", e=>{
+      e.preventDefault();
+      saveUserForm();
+    });
+
+    // Limpiar formulario
+    document.getElementById("btn-limpiar-u").addEventListener("click", ()=>{
+      document.getElementById("frm-usuario").reset();
+      document.getElementById("u-index").value = "";
+    });
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Productos | Admin</title><link rel="stylesheet" href="../css/admin.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="aside">
+      <a class="brand" href="../index.html"><img src="../assets/logo.svg" alt="Logo" width="28" height="28"/><span>GymTastic Admin</span></a>
+      <nav>
+        <a href="../index.html">Dashboard</a>
+        <a class="active" href="productos.html">Productos</a>
+        <a href="usuarios.html">Usuarios</a>
+      </nav>
+    </aside>
+    <main class="main">
+      <h1>Productos</h1>
+      <div class="grid">
+        <article class="card">
+          <h3>Listado</h3>
+          <table class="table" id="tbl-productos"><thead><tr><th>Código</th><th>Nombre</th><th>Precio</th><th>Stock</th><th>Categoría</th><th></th></tr></thead><tbody></tbody></table>
+        </article>
+        <article class="card">
+          <h3>Nuevo / Editar</h3>
+          <form id="frm-producto" class="form">
+            <div class="field"><label>Código</label><input id="p-codigo" required minlength="3"></div>
+            <div class="field"><label>Nombre</label><input id="p-nombre" required maxlength="100"></div>
+            <div class="field"><label>Descripción</label><textarea id="p-desc" maxlength="500"></textarea></div>
+            <div class="field"><label>Precio</label><input id="p-precio" type="number" min="0" step="0.01" required></div>
+            <div class="field"><label>Stock</label><input id="p-stock" type="number" min="0" step="1" required></div>
+            <div class="field"><label>Categoría</label>
+              <select id="p-cat" required>
+                <option value="">Seleccionar</option>
+                <option value="plan">Plan</option>
+                <option value="accesorio">Accesorio</option>
+              </select>
+            </div>
+            <div class="field"><label>Imagen (URL opcional)</label><input id="p-img" type="url"></div>
+            <div class="actions"><button class="btn primary" type="submit">Guardar</button><button class="btn" type="button" id="btn-limpiar">Limpiar</button></div>
+          </form>
+        </article>
+      </div>
+    </main>
+  </div>
+  <script src="../js/validators.js"></script>
+  <script src="../js/admin-app.js"></script>
+</body>
+</html>
