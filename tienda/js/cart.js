@@ -106,7 +106,7 @@ function checkout(){
 
   // Mostrar comprobante
   showModal({
-    title: "✅ Compra realizada",
+    title: " Compra realizada",
     body: `
       <p>Número de orden: <strong>${orderId}</strong></p>
       <p>Total pagado: <strong>${CLP(total)}</strong></p>

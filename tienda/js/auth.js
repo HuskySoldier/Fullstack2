@@ -42,7 +42,7 @@ function registerUser(){
     email,
     pass,
     fnac: "",
-    rol: "Cliente",   // 👈 clave para el header dinámico y admin
+    rol: "Cliente",   // por defecto
     region: "",
     comuna: "",
     dir: ""
@@ -50,7 +50,7 @@ function registerUser(){
 
   localStorage.setItem("users", JSON.stringify(users));
 
-  alert("✅ Registro exitoso. Ahora puedes iniciar sesión.");
+  alert(" Registro exitoso. Ahora puedes iniciar sesión.");
   window.location.href = "login.html"; // redirige desde /tienda/pages/
   return false;
 }
@@ -74,7 +74,7 @@ function loginUser(){
   let user = users.find(u => u.email === email && u.pass === pass);
 
   if(!user){
-    alert("❌ Usuario o contraseña incorrectos");
+    alert(" Usuario o contraseña incorrectos");
     return false;
   }
 
@@ -98,7 +98,7 @@ function updateHeader(){
   const nav = document.querySelector('.header .nav');
   if(!nav) return;
 
-  // ¿desde /tienda/pages/ o desde /tienda/ ?
+
   const inPages = location.pathname.includes('/tienda/pages/');
   const adminHref = inPages ? '../../admin/index.html' : '../admin/index.html';
 

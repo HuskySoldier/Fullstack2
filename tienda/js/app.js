@@ -8,19 +8,19 @@ window.addEventListener('DOMContentLoaded', ()=>{
   renderBlogDetail();
   renderCartPage();
   initAuth();
-  // ---- Header dinámico (déjalo FUERA del DOMContentLoaded)
+  // ---- Header dinámico 
 function updateHeader(){
   const nav = document.querySelector('.header .nav');
   if(!nav) return;
 
-  // ¿desde /tienda/pages/ o desde /tienda/ ?
+ 
   const inPages = location.pathname.includes('/tienda/pages/');
   const adminHref = inPages ? '../../admin/index.html' : '../admin/index.html';
 
   // Sesión
   const session = JSON.parse(localStorage.getItem('session_user') || 'null');
 
-  // Limpia restos anteriores
+  // Limpia 
   nav.querySelectorAll('[data-dyn]').forEach(el => el.remove());
 
   if(session){
@@ -56,6 +56,39 @@ function updateHeader(){
     });
   }
 }
+
+// ----------------- Blogs -----------------
+function renderBlogsList(){
+  const cont = document.getElementById("blog-list");
+  if(!cont) return;
+
+  cont.innerHTML = BLOGS.map(b => `
+    <article class="card">
+      <img src="${b.img}" alt="${b.titulo}" class="prod-img">
+      <h3>${b.titulo}</h3>
+      <p>${b.resumen}</p>
+    </article>
+  `).join("");
+}
+
+function renderBlogDetail(){
+  const cont = document.getElementById("blog-detail");
+  if(!cont) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
+  const b = BLOGS.find(x => x.id === id);
+  if(!b){ cont.innerHTML = "<p>Artículo no encontrado</p>"; return; }
+
+  cont.innerHTML = `
+    <article>
+      <h2>${b.titulo}</h2>
+      <p><small>${b.fecha} | ${b.autor}</small></p>
+      <p>${b.contenido}</p>
+    </article>
+  `;
+}
+
 
 // ---- Init (deja SOLO este listener)
 window.addEventListener('DOMContentLoaded', ()=>{

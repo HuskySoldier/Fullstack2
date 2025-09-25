@@ -1,5 +1,5 @@
-/* Admin styles matching theme */
-@import url('../tienda/css/styles.css'); /* not actually imported due to path; admin has own file. This comment is illustrative */
+
+@import url('../tienda/css/styles.css'); /* importa fuentes y reseteo básico */
 :root{
   --bg:#0b0e14; --card:#121826; --muted:#8892a6; --text:#e6ebff; --primary:#4f8cff; --accent:#00d18f; --border:#233149;
 }
@@ -50,7 +50,7 @@ html,body{
 .table{
   width:100%;
   border-collapse:collapse;
-  display:block;         /* 👈 permite scroll horizontal */
+  display:block;         
   overflow-x:auto;
   white-space:nowrap;
 }
@@ -59,7 +59,7 @@ html,body{
   padding:10px;
   text-align:left
 }
-/* 👇 asegura que la columna de acciones siempre tenga espacio */
+/*  asegura que la columna de acciones siempre tenga espacio */
 .table th:last-child,
 .table td:last-child{
   min-width:140px;

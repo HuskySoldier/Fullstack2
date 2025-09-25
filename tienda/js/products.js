@@ -1,10 +1,25 @@
-// Render products in home, products page, and detail
+
+// Resolve asset path for images (supports pages/ and root, and external URLs)
+function resolveImgSrc(raw){
+  const val = (raw || '').trim();
+  const isExternal = /^https?:|^data:|^\//i.test(val);
+  // determine base relative to current page
+  const base = (location.pathname.includes('/pages/')) ? '../assets/' : 'assets/';
+  if(!val) return base + 'default.png';
+  if(isExternal) return val;
+  // if a path accidentally contains assets/, strip it to keep a single base
+  const clean = val.replace(/^(\.\.\/)?assets\//, '');
+  return base + clean;
+}
+
+
 
 function renderHomePlans(){
   const grid = document.getElementById('planes-grid'); 
   if(!grid) return;
   grid.innerHTML = PRODUCTS.map(p => `
     <article class="card">
+      <img src="${resolveImgSrc(p.img)}" alt="${p.nombre}" class="prod-img"/>
       <h3>${p.nombre}</h3>
       <p class="price">${CLP(p.precio)}</p>
       <ul class="features">${p.features.map(f=>`<li>• ${f}</li>`).join('')}</ul>
@@ -20,6 +35,7 @@ function renderProductsPage(){
   if(!grid) return;
   grid.innerHTML = PRODUCTS.map(p => `
     <article class="card">
+      <img src="${resolveImgSrc(p.img)}" alt="${p.nombre}" class="prod-img"/>
       <h3>${p.nombre}</h3>
       <p class="price">${CLP(p.precio)}</p>
       <div class="actions">
@@ -41,7 +57,11 @@ function renderDetailPage(){
   }
   document.getElementById('prod-title').textContent = p.nombre;
   wrap.innerHTML = `
+    <img src="${resolveImgSrc(p.img)}" alt="${p.nombre}" class="prod-img-detail"/>
     <p class="price">${CLP(p.precio)}</p>
     <ul class="features">${p.features.map(f=>`<li>• ${f}</li>`).join('')}</ul>
-    <div class="actions"><button class="btn primary" onclick="addToCart('${p.id}')">Añadir al carrito</button></div>`;
+    <div class="actions">
+      <button class="btn primary" onclick="addToCart('${p.id}')">Añadir al carrito</button>
+    </div>`;
 }
+
