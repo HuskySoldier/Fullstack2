@@ -1,4 +1,8 @@
-const BLOGS = [
+import { Blog } from '../types'; // Importa tu tipo
+
+
+
+export const BLOGS: Blog[] = [
   {
     id: "b1",
     titulo: "Beneficios de entrenar 3 veces por semana",

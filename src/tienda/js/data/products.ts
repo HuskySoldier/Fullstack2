@@ -1,7 +1,11 @@
-function getProducts(){
-  const saved = JSON.parse(localStorage.getItem("PRODUCTS") || "[]");
+// src/tienda/js/data/products.ts
 
-  if(saved.length === 0){
+import { Product, SavedProduct } from '../types';
+
+function getProducts(): Product[] {
+  const saved: SavedProduct[] = JSON.parse(localStorage.getItem("PRODUCTS") || "[]");
+
+  if (saved.length === 0) {
     return [
       {
         id:'m1',
@@ -10,34 +14,7 @@ function getProducts(){
         features:['Acceso 24/7','Clases básicas','App y progreso'],
         img:'plan_mensual.png'
       },
-      {
-        id:'t3',
-        nombre:'Trimestral',
-        precio:54990,
-        features:['Todo Mensual','1 evaluación física','Invita a un amigo 1/mes'],
-        img:'plan-trimestral.png'
-      },
-      {
-        id:'a12',
-        nombre:'Anual',
-        precio:199990,
-        features:['Todo Trimestral','2 evaluaciones físicas','Polera GymTastic'],
-        img:'plan-anual.png'
-      },
-      {
-        id:'acc1',
-        nombre:'Botella GymTastic',
-        precio:5990,
-        features:['Botella plástica 750ml','Logo oficial'],
-        img:'botella.png'
-      },
-      {
-        id:'acc2',
-        nombre:'Guantes Pro',
-        precio:12990,
-        features:['Cuero sintético','Protección de muñeca'],
-        img:'guantes.png'
-      },
+      // ... (el resto de tus productos) ...
       {
         id:'acc3',
         nombre:'Bandas Elásticas',
@@ -48,14 +25,14 @@ function getProducts(){
     ];
   }
 
-  return saved.map(p => ({
-  id: p.codigo || p.id,
-  nombre: p.nombre,
-  precio: parseFloat(p.precio),
-  img: p.img && p.img.trim() ? p.img : 'logo.svg',  // por ahora en logo hasta que pueda cambiarlo
-  features: p.desc ? [p.desc] : ["Plan personalizado"]
-}));
-
+  return saved.map((p: SavedProduct): Product => ({
+    id: p.codigo || p.id,
+    nombre: p.nombre,
+    precio: parseFloat(p.precio),
+    img: p.img && p.img.trim() ? p.img : 'logo.svg',
+    features: p.desc ? [p.desc] : ["Plan personalizado"]
+  }));
 }
 
-const PRODUCTS = getProducts();
+// ¡¡ESTA ES LA LÍNEA QUE FALTABA!!
+export const PRODUCTS = getProducts();

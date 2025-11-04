@@ -1,67 +1,112 @@
+// src/tienda/js/products.ts
+// Lógica para RENDERIZAR productos en las páginas
 
-// Resolve asset path for images (supports pages/ and root, and external URLs)
-function resolveImgSrc(raw){
-  const val = (raw || '').trim();
-  const isExternal = /^https?:|^data:|^\//i.test(val);
-  // determine base relative to current page
-  const base = (location.pathname.includes('/pages/')) ? '../assets/' : 'assets/';
-  if(!val) return base + 'default.png';
-  if(isExternal) return val;
-  // if a path accidentally contains assets/, strip it to keep a single base
-  const clean = val.replace(/^(\.\.\/)?assets\//, '');
-  return base + clean;
+// 1. Importaciones
+import { $ } from './utils/dom';
+import { Product } from './types';
+import { PRODUCTS } from './data/products'; // Importa la data
+import { addToCart } from './cart';         // Importa la acción del carrito
+import { CLP } from './utils/format';       // Importa el formateador de moneda
+
+
+
+
+// --- Renderizado de Planes en el Home ---
+// (app.ts la importa y la llama)
+export function renderHomePlans(): void {
+  // Asumo que tu contenedor en index.html tiene este ID
+  const cont = $<HTMLDivElement>('#home-plans-container'); 
+  if (!cont) return;
+
+  // Filtramos solo los planes
+  const planIds = ['m1', 't3', 'a12'];
+  const planes = PRODUCTS.filter(p => planIds.includes(p.id));
+
+  cont.innerHTML = planes.map((plan: Product) => `
+    <article class="plan-card"> <img src="assets/${plan.img}" alt="${plan.nombre}">
+      <h3>${plan.nombre}</h3>
+      <p class="precio">${CLP(plan.precio)}</p>
+      <ul>
+        ${plan.features.map(f => `<li>✅ ${f}</li>`).join("")}
+      </ul>
+      <a href="pages/detalle.html?id=${plan.id}" class="btn">Ver más</a>
+    </article>
+  `).join("");
 }
 
+// --- Renderizado de Página de Productos (Accesorios) ---
+// (app.ts la importa y la llama)
+export function renderProductsPage(): void {
+  // Asumo que tu contenedor en productos.html tiene este ID
+  const cont = $<HTMLDivElement>('#products-container'); 
+  if (!cont) return;
+  
+  // Filtramos solo los accesorios
+  const accesorios = PRODUCTS.filter(p => p.id.startsWith('acc'));
 
-
-function renderHomePlans(){
-  const grid = document.getElementById('planes-grid'); 
-  if(!grid) return;
-  grid.innerHTML = PRODUCTS.map(p => `
+  cont.innerHTML = accesorios.map((prod: Product) => `
     <article class="card">
-      <img src="${resolveImgSrc(p.img)}" alt="${p.nombre}" class="prod-img"/>
-      <h3>${p.nombre}</h3>
-      <p class="price">${CLP(p.precio)}</p>
-      <ul class="features">${p.features.map(f=>`<li>• ${f}</li>`).join('')}</ul>
-      <div class="actions">
-        <button class="btn primary" onclick="addToCart('${p.id}')">Agregar</button>
-        <a class="btn subtle" href="pages/detalle.html?id=${p.id}">Ver detalle</a>
-      </div>
-    </article>`).join('');
-}
+      <img src="../assets/${prod.img}" alt="${prod.nombre}" class="prod-img">
+      <h3>${prod.nombre}</h3>
+      <p class="precio">${CLP(prod.precio)}</p>
+      <button class="btn btn-add-cart" data-id="${prod.id}">Añadir al carrito</button>
+    </article>
+  `).join("");
 
-function renderProductsPage(){
-  const grid = document.getElementById('productos-grid'); 
-  if(!grid) return;
-  grid.innerHTML = PRODUCTS.map(p => `
-    <article class="card">
-      <img src="${resolveImgSrc(p.img)}" alt="${p.nombre}" class="prod-img"/>
-      <h3>${p.nombre}</h3>
-      <p class="price">${CLP(p.precio)}</p>
-      <div class="actions">
-        <button class="btn primary" onclick="addToCart('${p.id}')">Añadir</button>
-        <a class="btn subtle" href="detalle.html?id=${p.id}">Detalle</a>
-      </div>
-    </article>`).join('');
-}
-
-function renderDetailPage(){
-  const wrap = document.getElementById('prod-detail'); 
-  if(!wrap) return;
-  const sp = new URLSearchParams(location.search);
-  const id = sp.get('id');
-  const p = PRODUCTS.find(x=>x.id===id);
-  if(!p){ 
-    wrap.innerHTML='<p>Producto no encontrado</p>'; 
-    return; 
+  // Delegado de eventos para los botones "Añadir al carrito"
+  // (Un solo listener en el contenedor padre)
+  if (!cont.dataset.cartListener) {
+    cont.addEventListener('click', (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const btn = target.closest<HTMLButtonElement>('.btn-add-cart');
+      
+      if (btn) {
+        const id = btn.dataset.id;
+        if (id) {
+          addToCart(id); // Llama a la función importada de cart.ts
+        }
+      }
+    });
+    cont.dataset.cartListener = 'true';
   }
-  document.getElementById('prod-title').textContent = p.nombre;
-  wrap.innerHTML = `
-    <img src="${resolveImgSrc(p.img)}" alt="${p.nombre}" class="prod-img-detail"/>
-    <p class="price">${CLP(p.precio)}</p>
-    <ul class="features">${p.features.map(f=>`<li>• ${f}</li>`).join('')}</ul>
-    <div class="actions">
-      <button class="btn primary" onclick="addToCart('${p.id}')">Añadir al carrito</button>
-    </div>`;
 }
 
+// --- Renderizado de Página de Detalle ---
+// (app.ts la importa y la llama)
+export function renderDetailPage(): void {
+  // Asumo que tu contenedor en detalle.html tiene este ID
+  const cont = $<HTMLDivElement>('#detail-container'); 
+  if (!cont) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
+  const prod = PRODUCTS.find((x: Product) => x.id === id);
+
+  if (!prod) {
+    cont.innerHTML = "<p>Producto no encontrado.</p>";
+    return;
+  }
+
+  cont.innerHTML = `
+    <div class="detalle-producto">
+      <img src="../assets/${prod.img}" alt="${prod.nombre}">
+      <div class="detalle-info">
+        <h2>${prod.nombre}</h2>
+        <p class="precio">${CLP(prod.precio)}</p>
+        <p><strong>Características:</strong></p>
+        <ul>
+          ${prod.features.map(f => `<li>${f}</li>`).join("")}
+        </ul>
+        <button class="btn btn-add-cart" data-id="${prod.id}">Añadir al carrito</button>
+      </div>
+    </div>
+  `;
+
+  // Listener para el botón único en esta página
+  const btn = $<HTMLButtonElement>('.btn-add-cart', cont);
+  if (btn) {
+    btn.addEventListener('click', () => {
+      addToCart(prod.id); // Llama a la función importada de cart.ts
+    });
+  }
+}

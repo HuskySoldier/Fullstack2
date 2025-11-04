@@ -1,5 +1,52 @@
+// src/tienda/js/auth.ts
+
+// --- 1. Importaciones ---
+import { $ } from './utils/dom'; // Importamos nuestro selector $
+import { User, SessionUser } from './types'; // Importamos los tipos
+// Asumo que 'showModal' está en globals.d.ts o se importará
+// import { showModal } from './utils/modal'; 
+
+// --- 2. Funciones Exportadas (las que usa app.ts) ---
+
+/**
+ * Conecta los listeners de los formularios de login/registro
+ * y ejecuta la semilla del admin.
+ */
+export function initAuth(): void {
+  // Conectar formularios (lógica que estaba en DOMContentLoaded)
+  const fReg = $<HTMLFormElement>("#form-registro");
+  if (fReg) {
+    fReg.addEventListener("submit", (e: SubmitEvent) => {
+      e.preventDefault();
+      registerUser();
+    });
+  }
+
+  const fLog = $<HTMLFormElement>("#form-login");
+  if (fLog) {
+    fLog.addEventListener("submit", (e: SubmitEvent) => {
+      e.preventDefault();
+      loginUser();
+    });
+  }
+  
+  // Ejecutar la semilla de admin
+  seedAdmin();
+}
+
+/**
+ * Cierra la sesión del usuario y recarga la página.
+ */
+export function logoutUser(): void {
+  localStorage.removeItem('session_user');
+  location.href = resolveTiendaIndex(); // Usamos el helper para ir al index
+}
+
+
+// --- 3. Funciones Internas (NO se exportan) ---
+
 // Helper para resolver la ruta correcta del index según la ubicación
-function resolveTiendaIndex(){
+function resolveTiendaIndex(): string {
   const p = location.pathname.replace(/\\/g,'/');
   if (p.includes('/tienda/pages/')) return '../index.html';
   if (p.includes('/tienda/')) return 'index.html';
@@ -7,34 +54,43 @@ function resolveTiendaIndex(){
 }
 
 // ----------------- Registro -----------------
-function registerUser(){
-  const nombre = document.getElementById("reg-nombre").value.trim();
-  const email  = document.getElementById("reg-email").value.trim();
-  const pass   = document.getElementById("reg-pass").value.trim();
+function registerUser(): void { // <-- Cambiado a 'void'
+  // --- ¡ARREGLO! Se usa $<HTMLInputElement> para acceder a .value ---
+  const nombreInput = $<HTMLInputElement>("#reg-nombre");
+  const emailInput = $<HTMLInputElement>("#reg-email");
+  const passInput = $<HTMLInputElement>("#reg-pass");
 
-  // Validaciones
-  if(nombre.length < 3){ 
-    alert("El nombre debe tener al menos 3 caracteres"); 
-    return false; 
+  // Validamos que los inputs existan
+  if (!nombreInput || !emailInput || !passInput) return;
+
+  const nombre = nombreInput.value.trim();
+  const email = emailInput.value.trim();
+  const pass = passInput.value.trim();
+
+  // Validaciones (TODO: Reemplazar 'alert' por 'showModal')
+  if (nombre.length < 3) {
+    alert("El nombre debe tener al menos 3 caracteres");
+    return; // <-- Cambiado de 'return false'
   }
-  if(!/.+@(duoc\.cl|profesor\.duoc\.cl|gmail\.com)$/i.test(email)){ 
-    alert("Correo inválido. Solo se permiten @duoc.cl, @profesor.duoc.cl o @gmail.com"); 
-    return false; 
+  if (!/.+@(duoc\.cl|profesor\.duoc\.cl|gmail\.com)$/i.test(email)) {
+    alert("Correo inválido. Solo se permiten @duoc.cl, @profesor\.duoc\.cl o @gmail.com");
+    return;
   }
-  if(pass.length < 4 || pass.length > 10){ 
-    alert("La contraseña debe tener entre 4 y 10 caracteres"); 
-    return false; 
+  if (pass.length < 4 || pass.length > 10) {
+    alert("La contraseña debe tener entre 4 y 10 caracteres");
+    return;
   }
 
-  let users = JSON.parse(localStorage.getItem("users") || "[]");
+  // Tipamos el array de usuarios
+  const users: User[] = JSON.parse(localStorage.getItem("users") || "[]");
 
   // Evitar duplicados
-  if(users.find(u => u.email === email)){
+  if (users.find((u: User) => u.email === email)) {
     alert("Ya existe un usuario registrado con este correo");
-    return false;
+    return;
   }
 
-  // Guardar usuario con estructura completa
+  // Guardar usuario (TypeScript valida que 'rol' sea uno de los valores permitidos)
   users.push({
     run: "",
     nombre,
@@ -42,7 +98,7 @@ function registerUser(){
     email,
     pass,
     fnac: "",
-    rol: "Cliente",   // por defecto
+    rol: "Cliente", // por defecto
     region: "",
     comuna: "",
     dir: ""
@@ -50,124 +106,58 @@ function registerUser(){
 
   localStorage.setItem("users", JSON.stringify(users));
 
-  alert(" Registro exitoso. Ahora puedes iniciar sesión.");
+  alert("Registro exitoso. Ahora puedes iniciar sesión.");
   window.location.href = "login.html"; // redirige desde /tienda/pages/
-  return false;
 }
 
 // ----------------- Login -----------------
-function loginUser(){
-  const email = document.getElementById("log-email").value.trim();
-  const pass  = document.getElementById("log-pass").value.trim();
+function loginUser(): void { // <-- Cambiado a 'void'
+  // --- ¡ARREGLO! Se usa $<HTMLInputElement> para acceder a .value ---
+  const emailInput = $<HTMLInputElement>("#log-email");
+  const passInput = $<HTMLInputElement>("#log-pass");
+  
+  if (!emailInput || !passInput) return;
+
+  const email = emailInput.value.trim();
+  const pass = passInput.value.trim();
 
   // Validaciones
-  if(!/.+@(duoc\.cl|profesor\.duoc\.cl|gmail\.com)$/i.test(email)){ 
-    alert("Correo inválido. Solo se permiten @duoc.cl, @profesor.duoc.cl o @gmail.com"); 
-    return false; 
+  if (!/.+@(duoc\.cl|profesor\.duoc\.cl|gmail\.com)$/i.test(email)) {
+    alert("Correo inválido. Solo se permiten @duoc.cl, @profesor\.duoc\.cl o @gmail.com");
+    return;
   }
-  if(pass.length < 4 || pass.length > 10){ 
-    alert("Contraseña inválida"); 
-    return false; 
-  }
-
-  let users = JSON.parse(localStorage.getItem("users") || "[]");
-  let user = users.find(u => u.email === email && u.pass === pass);
-
-  if(!user){
-    alert(" Usuario o contraseña incorrectos");
-    return false;
+  if (pass.length < 4 || pass.length > 10) {
+    alert("Contraseña inválida");
+    return;
   }
 
-  // Guardar sesión
+  const users: User[] = JSON.parse(localStorage.getItem("users") || "[]");
+  // Tipamos 'user'
+  const user = users.find((u: User) => u.email === email && u.pass === pass);
+
+  if (!user) {
+    alert("Usuario o contraseña incorrectos");
+    return;
+  }
+
+  // Guardar sesión (TypeScript comprueba que 'user' cumpla con SessionUser)
+  // (Asumiendo que SessionUser y User son compatibles)
   localStorage.setItem("session_user", JSON.stringify(user));
 
   alert(`Bienvenido ${user.nombre}`);
   window.location.href = "../index.html"; // desde /tienda/pages/login.html
-  return false;
 }
 
-// ----------------- Cerrar sesión -----------------
-function logoutUser(){
-  localStorage.removeItem("session_user");
-  alert("Sesión cerrada");
-  location.href = resolveTiendaIndex();
-}
 
-// ----------------- Header dinámico -----------------
-function updateHeader(){
-  const nav = document.querySelector('.header .nav');
-  if(!nav) return;
+// --- 4. Lógica de Inicialización (Semilla) ---
 
-
-  const inPages = location.pathname.includes('/tienda/pages/');
-  const adminHref = inPages ? '../../admin/index.html' : '../admin/index.html';
-
-  // Usuario en sesión
-  const session = JSON.parse(localStorage.getItem('session_user') || 'null');
-
-  // Limpiar estados previos
-  nav.querySelectorAll('[data-dyn]').forEach(el => el.remove());
-
-  if(session){
-    // Saludo
-    const hello = document.createElement('span');
-    hello.className = 'badge';
-    hello.textContent = `Hola, ${session.nombre || 'Usuario'}`;
-    hello.setAttribute('data-dyn','1');
-    nav.appendChild(hello);
-
-    // Link Admin (solo Admin/Vendedor)
-    if(session.rol === 'Administrador' || session.rol === 'Vendedor'){
-      const aAdmin = document.createElement('a');
-      aAdmin.href = adminHref;
-      aAdmin.textContent = 'Admin';
-      aAdmin.setAttribute('data-dyn','1');
-      nav.appendChild(aAdmin);
-    }
-
-    // Cerrar sesión
-    const aOut = document.createElement('a');
-    aOut.href = '#';
-    aOut.textContent = 'Cerrar sesión';
-    aOut.onclick = (e)=>{ e.preventDefault(); logoutUser(); };
-    aOut.setAttribute('data-dyn','1');
-    nav.appendChild(aOut);
-
-    // Ocultar Registro/Login
-    nav.querySelectorAll('a').forEach(a=>{
-      if(/registro\.html|login\.html/i.test(a.getAttribute('href')||'')){
-        a.style.display = 'none';
-      }
-    });
-  }
-}
-
-// ----------------- Conectar formularios -----------------
-document.addEventListener("DOMContentLoaded", ()=>{
-  const fReg = document.getElementById("form-registro");
-  if(fReg){
-    fReg.addEventListener("submit", e=>{
-      e.preventDefault();
-      registerUser();
-    });
-  }
-
-  const fLog = document.getElementById("form-login");
-  if(fLog){
-    fLog.addEventListener("submit", e=>{
-      e.preventDefault();
-      loginUser();
-    });
-  }
-
-  // Actualizar header en todas las páginas
-  updateHeader();
-});
-
-// Semilla de usuario Admin si no existe
-(function seedAdmin(){
-  let users = JSON.parse(localStorage.getItem("users") || "[]");
-  if(!users.find(u => u.email === "admin@duoc.cl")){
+/**
+ * Semilla de usuario Admin si no existe
+ */
+function seedAdmin(): void {
+  const users: User[] = JSON.parse(localStorage.getItem("users") || "[]");
+  
+  if (!users.find((u: User) => u.email === "admin@duoc.cl")) {
     users.push({
       run: "12345678K",
       nombre: "Admin",
@@ -182,5 +172,5 @@ document.addEventListener("DOMContentLoaded", ()=>{
     });
     localStorage.setItem("users", JSON.stringify(users));
   }
-})();
+}
 
